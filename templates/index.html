@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Camera Control</title>
+</head>
+<body>
+    <button onclick="startStream()">Start Camera 1</button>
+
+    <script>
+        function startStream() {
+            fetch('/start-hls', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    alert('Stream started successfully.');
+                    window.open('/camera1', '_blank');  // Corrected to use the Flask route
+                } else {
+                    alert('Failed to start the stream: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error starting the stream. Check console for details.');
+            });
+        }
+    </script>
+</body>
+</html>
