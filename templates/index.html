@@ -5,24 +5,41 @@
     <title>Camera Control</title>
 </head>
 <body>
-    <button onclick="startStream()">Start Camera 1</button>
+    <button onclick="resetStreams()">Reset Streams</button>
+    <button onclick="startStreams()">Start Streams</button>
+    <button onclick="openCamera1()">Camera 1</button>
 
     <script>
-        function startStream() {
-            fetch('/start-hls', { method: 'POST' })
+        function resetStreams() {
+            fetch('/reset-hls', { method: 'POST' })
             .then(response => response.json())
             .then(data => {
-                if(data.success) {
-                    alert('Stream started successfully.');
-                    window.open('/camera1', '_blank');  // Corrected to use the Flask route
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error resetting streams. Check console for details.');
+            });
+        }
+
+        function startStreams() {
+            fetch('/start-streams', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Streams started successfully.');
                 } else {
-                    alert('Failed to start the stream: ' + data.message);
+                    alert('Failed to start streams: ' + data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error starting the stream. Check console for details.');
+                alert('Error starting streams. Check console for details.');
             });
+        }
+
+        function openCamera1() {
+            window.open('/camera1', '_blank');
         }
     </script>
 </body>
