@@ -17,16 +17,23 @@ def start_streams():
     script_path = "/home/seyr/Desktop/start_camera1.py"
     python_env_path = "/home/seyr/myprojectenv/bin/python3"
     try:
+        # Start the RTSP stream script without waiting for its output
         subprocess.Popen([python_env_path, script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        ffmpeg_command = "sudo /usr/bin/ffmpeg -i rtsp://10.0.32.250:8554/stream1 -codec copy -bsf:v h264_mp4toannexb -hls_time 2 -hls_list_size 10 -hls_flags delete_segments+append_list -f hls /var/www/html/hls/camera1/index.m3u8"
-        subprocess.Popen(shlex.split(ffmpeg_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return jsonify({'success': True, 'message': 'Stream started successfully.'})
+        # Prepare the ffmpeg command to run in a new terminal
+        ffmpeg_command = "sudo /usr/bin/ffmpeg -i rtsp://10.0.32.250:8554/stream1 -codec copy -bsf:v h264_mp4toannexb -hls_time 2 -hls_list_size 30 -hls_flags delete_segments+append_list -f hls /var/www/html/hls/camera1/index.m3u8"
+        # Open a new terminal to run the ffmpeg command
+        subprocess.Popen(['xterm', '-e', ffmpeg_command])
+        return jsonify({'success': True, 'message': 'Stream started successfully in a new terminal.'})
     except Exception as e:
         return jsonify({'success': False, 'message': 'Failed to start the stream.', 'error': str(e)})
 
 @app.route('/reset-hls', methods=['POST'])
 def reset_hls():
     try:
+        # First, kill all running ffmpeg processes to ensure no files are being written to during the cleanup
+        kill_command = 'sudo pkill -9 ffmpeg'
+        subprocess.run(kill_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Remove all HLS residues
         subprocess.run('sudo rm /var/www/html/hls/*/*.m3u8 /var/www/html/hls/*/*.ts', shell=True, check=True)
         return jsonify({'success': True, 'message': 'All streams reset successfully.'})
     except subprocess.CalledProcessError as e:
