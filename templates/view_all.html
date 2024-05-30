@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View All Cameras</title>
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+            overflow: hidden; /* Prevents scrolling */
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(30vw, 1fr)); /* Dynamically adjust based on the viewport width */
+            grid-template-rows: repeat(auto-fill, minmax(30vh, 1fr)); /* Dynamically adjust based on the viewport height */
+            gap: 10px;
+            padding: 10px;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            align-content: center;
+            justify-content: center;
+        }
+        .camera {
+            border: 2px solid white;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .label {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        video {
+            width: 100%; /* Make video fill the grid cell */
+            height: calc(100% - 20px); /* Subtract space for the label */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="camera" id="camera1">
+            <div class="label">Camera 1</div>
+            <video controls autoplay></video>
+        </div>
+        <div class="camera" id="camera2">
+            <div class="label">Camera 2</div>
+            <video controls autoplay></video>
+        </div>
+        <div class="camera" id="camera3">
+            <div class="label">Camera 3</div>
+            <video controls autoplay></video>
+        </div>
+        <div class="camera" id="camera4">
+            <div class="label">Camera 4</div>
+            <video controls autoplay></video>
+        </div>
+    </div>
+
+    <script>
+        const cameras = [
+            { id: 'camera1', url: 'http://10.0.32.222/hls/camera1/index.m3u8' },
+            { id: 'camera2', url: 'http://10.0.32.222/hls/camera2/index.m3u8' },
+            { id: 'camera3', url: 'http://10.0.32.222/hls/camera3/index.m3u8' },
+            { id: 'camera4', url: 'http://10.0.32.222/hls/camera4/index.m3u8' }
+        ];
+
+        cameras.forEach(camera => {
+            const videoElement = document.querySelector(`#${camera.id} video`);
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(camera.url);
+                hls.attachMedia(videoElement);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoElement.play();
+                });
+            } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                videoElement.src = camera.url;
+                videoElement.play();
+            }
+        });
+    </script>
+</body>
+</html>
